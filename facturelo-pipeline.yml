@@ -1,0 +1,43 @@
+pool:
+  name: Azure Pipelines
+  vmImage: 'ubuntu-latest'
+
+trigger:
+- master
+
+variables:
+  - group: 'variables-prod'
+
+steps:
+- task: NodeTool@0
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  displayName: 'Use Node version'
+  inputs:
+    versionSpec: '14.x'
+
+- script: |
+    npm install
+    npm run build
+  displayName: 'npm install and build'
+
+- task: ArchiveFiles@1
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  displayName: 'Archive files'
+  inputs:
+    rootFolder: '$(System.DefaultWorkingDirectory)/build'
+    includeRootFolder: false
+
+- task: CopyFiles@2
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  displayName: 'Copy File to: $(TargetFolder)'
+  inputs:
+    SourceFolder: '$(Build.ArtifactStagingDirectory)'
+    Contents: '$(Build.BuildId).zip'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)\ArtifactsToBePublished\master'
+
+- task: PublishBuildArtifacts@1
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  displayName: 'Publish Artifact: pro'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)\ArtifactsToBePublished\master'
+
