@@ -1,5 +1,4 @@
 pool:
-  name: Azure Pipelines
   vmImage: 'ubuntu-latest'
 
 trigger:
@@ -13,7 +12,7 @@ steps:
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
   displayName: 'Use Node version'
   inputs:
-    versionSpec: '14.x'
+    versionSpec: '16.x'
 
 - script: |
     npm install
